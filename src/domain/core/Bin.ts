@@ -1,4 +1,5 @@
 import * as config from "../../../config/config.json";
+import InternalError from "../errors/InternalError";
 
 import Directory from "./Directory";
 import Node from "./Node";
@@ -11,18 +12,23 @@ export default class Bin extends Node {
     super(config.BIN_DIR, root, children);
   }
 
-  async clearBin(clear: (bin: Bin) => Promise<void>): Promise<void> {
-    await clear(this);
+  async clear(clearBin: (bin: Bin) => Promise<void>): Promise<void> {
+    await clearBin(this);
     //Node é um em concepção Directory logo suas childrens = [], no mínimo
     this.getChildren()!.forEach((node) => this.removeChild(node));
   }
 
-  async restoreElements(
+  async restore(
     node: Node,
-    restore: (binChild: Node) => Promise<void>,
+    restoreElement: (binChild: Node) => Promise<void>,
   ): Promise<void> {
-    await restore(node);
-    node.getParents()?.addChild(node);
+    if (node.getParent() === null) {
+      throw new InternalError();
+    }
+
+    await restoreElement(node);
+
+    node.getParent()!.addChild(node);
     this.removeChild(node);
   }
 

@@ -1,4 +1,4 @@
-import { AccessLevel, UserType } from "@/@types/types";
+import { UserRoles, UserType } from "@/@types/types";
 import RequiredFieldError from "../errors/RequiredFieldError";
 import InvalidFieldError from "../errors/InvalidFieldError";
 import Cryptography from "../interfaces/Cryptography";
@@ -72,8 +72,8 @@ export default class User {
     return this.user.username;
   }
 
-  getAccessLevel(): AccessLevel {
-    return this.user.accessLevel;
+  getAccessLevel(): UserRoles {
+    return this.user.role;
   }
 
   setPassword(newPassword: string): void {

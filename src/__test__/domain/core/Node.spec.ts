@@ -1,56 +1,148 @@
 import Node from "@/domain/core/Node";
+import InternalError from "@/domain/errors/InternalError";
 
-describe("Node class", () => {
-  it("should create a new Node instance", () => {
-    const node = new Node("node-name");
-    expect(node).toBeInstanceOf(Node);
+describe("Node", () => {
+  describe("equals", () => {
+    it("Deve retornar false quando os nodes são diferentes", () => {
+      const parentA = new Node("Parent-A");
+      const nodeA = new Node("node-A", parentA);
+      parentA.addChild(nodeA);
+
+      const parentB = new Node("Parent-B");
+      const nodeB = new Node("node-B", parentB);
+      parentB.addChild(nodeB);
+
+      expect(nodeA.equals(nodeB)).toBe(false);
+      expect(nodeB.equals(nodeA)).toBe(false);
+    });
+
+    it("Deve retornar true quando o equals é aplicado mesmo node", () => {
+      const parentA = new Node("Parent-A");
+      const nodeA = new Node("node-A", parentA);
+      parentA.addChild(nodeA);
+
+      expect(nodeA.equals(nodeA)).toBe(true);
+    });
+
+    it("Deve retornar true quando os nodes tem mesmas propriedades", () => {
+      const parentA = new Node("Parent-A");
+      const nodeA = new Node("node-A", parentA);
+      parentA.addChild(nodeA);
+
+      const nodeB = new Node("node-A", parentA);
+      parentA.addChild(nodeB);
+
+      expect(nodeA.equals(nodeB)).toBe(true);
+      expect(nodeB.equals(nodeA)).toBe(true);
+    });
+
+    it("Deve retornar false quando os nodes tem nomes diferenes", () => {
+      const parentA = new Node("Parent-A");
+      const nodeA = new Node("node-A", parentA);
+      parentA.addChild(nodeA);
+
+      const nodeB = new Node("node-B", parentA);
+      parentA.addChild(nodeB);
+
+      expect(nodeA.equals(nodeB)).toBe(false);
+      expect(nodeB.equals(nodeA)).toBe(false);
+    });
+
+    it("Deve retornar false quando os nodes tem parents diferentes", () => {
+      const parentA = new Node("Parent-A");
+      const nodeA = new Node("node-A", parentA);
+
+      const parentB = new Node("Parent-B");
+      const nodeB = new Node("node-A", parentB);
+
+      expect(nodeA.equals(nodeB)).toBe(false);
+      expect(nodeB.equals(nodeA)).toBe(false);
+    });
+
+    it("Deve retornar false quando os nodes tem quantidades de children diferentes", () => {
+      const childA = new Node("Child-A");
+      const nodeA = new Node("node-A", null, [childA]);
+      childA.setParent(nodeA);
+
+      const childB = new Node("child-B");
+      const childC = new Node("child-C");
+      const nodeB = new Node("node-B", null, [childB, childC]);
+      childB.setParent(nodeB);
+      childC.setParent(nodeB);
+
+      expect(nodeA.equals(nodeB)).toBe(false);
+      expect(nodeB.equals(nodeA)).toBe(false);
+    });
+
+    it("Deve retornar false quando os nodes tem children diferentes", () => {
+      const parentA = new Node("Parent-A");
+      const nodeA = new Node("node-A", parentA);
+      parentA.addChild(nodeA);
+
+      const parentB = new Node("Parent-B");
+      const nodeB = new Node("node-B", parentB);
+      parentB.addChild(nodeB);
+
+      expect(nodeA.equals(nodeB)).toBe(false);
+      expect(nodeB.equals(nodeA)).toBe(false);
+    });
+
+    it("Deve retornar false quando há referências ciclicas.", () => {
+      const rootA = new Node("RootA");
+      const childA1 = new Node("Child-A1", rootA);
+      const childA2 = new Node("Child-A2", rootA);
+      rootA.addChild(childA1);
+      rootA.addChild(childA2);
+
+      const rootB = new Node("RootA");
+      const childB1 = new Node("Child-A1", rootB);
+      rootB.addChild(childB1);
+      rootB.addChild(rootA);
+
+      expect(rootA.equals(rootB)).toBe(false);
+    });
   });
 
-  it("should set the name property", () => {
-    const node = new Node("node-name");
-    expect(node.getName()).toBe("node-name");
+  describe("addChild", () => {
+    it("Deve adicionar um child ao node", () => {
+      const node = new Node("Parent");
+      const child = new Node("Child");
+
+      node.addChild(child);
+      expect(node.getChildren()).toContain(child);
+    });
+
+    it("Deve lançar uma exceção InternalError quando se tenta adicionar uma child a um node que aponta para null", () => {
+      //O caso em que um node tém null como child significa que esse node representa um File
+      const parentA = new Node("file", new Node("parent"), null);
+      const parentB = new Node("file", null, null);
+      const node = new Node("Node");
+
+      expect(() => parentA.addChild(node)).toThrow(InternalError);
+      expect(() => parentB.addChild(node)).toThrow(InternalError);
+    });
   });
 
-  it("should set the parents property", () => {
-    const parent = new Node("parent-name");
-    const node = new Node("node-name", parent);
-    expect(node.getParents()).toBe(parent);
-  });
+  describe("removeChild", () => {
+    it("Deve remover um child ao node", () => {
+      const node = new Node("Parent");
+      const child = new Node("Child", node);
 
-  it("should add the children property", () => {
-    const node = new Node("node-name");
-    const child = new Node("child-name");
-    node.addChild(child);
-    expect(node.getChildren()).toContain(child);
-  });
+      node.addChild(child);
+      node.removeChild(child);
+      expect(node.getChildren()).not.toContain(child);
+    });
 
-  it("should remove a child node", () => {
-    const node = new Node("node-name");
-    const child = new Node("child-name");
-    node.addChild(child);
-    node.removeChild(child);
-    expect(node.getChildren()).not.toContain(child);
-  });
+    it("Deve lança uma exceção InternalError quando se tenta remover uma child de um node que aponta para null", () => {
+      //Isso é, Lança exceção quando se tenta remover uma child de File
 
-  it("should check if two nodes are equal", () => {
-    const node1 = new Node("node-name");
-    const node2 = new Node("node-name");
-    expect(node1.equals(node2)).toBe(true);
-  });
+      const parent = new Node("file", new Node("parent"), null);
+      const parentA = new Node("file", null, null);
 
-  it("should check if two nodes are not equal", () => {
-    const node1 = new Node("node-name");
-    const node2 = new Node("different-name");
-    expect(node1.equals(node2)).toBe(false);
-  });
-
-  it("should handle cyclic references when checking equality", () => {
-    const node1 = new Node("node-name");
-    const node2 = new Node("node-name");
-
-    node1.addChild(node2);
-    node2.addChild(node1);
-
-    expect(node1.equals(node2)).toBe(false);
+      expect(() => parent.removeChild(new Node("Node"))).toThrow(InternalError);
+      expect(() => parentA.removeChild(new Node("Node"))).toThrow(
+        InternalError,
+      );
+    });
   });
 });

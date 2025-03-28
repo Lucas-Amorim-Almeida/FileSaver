@@ -23,12 +23,12 @@ export default class Directory extends Node {
     }
 
     //se o pai for null (falsy) é raiz e não lixeira
-    if (!this.getParents()) {
+    if (!this.getParent()) {
       return false;
     }
 
     const root = new Directory(config.ROOT_DIR);
-    if (!root.equals(this.getParents() as Node)) {
+    if (!root.equals(this.getParent() as Node)) {
       return false;
     }
 
@@ -41,7 +41,7 @@ export default class Directory extends Node {
     }
 
     //se existe diretório pai não é raiz
-    if (this.getParents()) {
+    if (this.getParent()) {
       return false;
     }
 
@@ -77,15 +77,15 @@ export default class Directory extends Node {
     }
 
     await moveTo(this, dir);
-    this.getParents()?.removeChild(this);
-    this.setParents(dir);
+    this.getParent()?.removeChild(this);
+    this.setParent(dir);
     dir.addChild(this);
   }
 
   async copy(
     dir: Directory,
     copyTo: (dir: Directory, destiny: Directory) => Promise<string>, //returns copyDir name
-  ): Promise<void> {
+  ): Promise<Directory> {
     if (this.isBinDir() || this.isRootDir()) {
       throw new InternalError();
     }
@@ -99,6 +99,8 @@ export default class Directory extends Node {
       this.getChildren() as Node[],
     );
     dir.addChild(copyDir);
+
+    return copyDir;
   }
 
   async moveToBin(
@@ -109,7 +111,7 @@ export default class Directory extends Node {
 
     //Volta até o pai e remove este de seus filhos
     //este continuara tendo o pai normalmente para que o restore da Bin funcione
-    const thisParents = this.getParents();
+    const thisParents = this.getParent();
     thisParents?.removeChild(this);
     bin.addChild(this);
   }

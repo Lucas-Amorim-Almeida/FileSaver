@@ -27,7 +27,7 @@ describe("User class", () => {
       const userData: UserType = {
         username: "john_doe",
         password: "abc@ABC@123",
-        accessLevel: "COMMON",
+        role: "COMMON",
       };
       expect(new User(userData)).toBeInstanceOf(User);
     });
@@ -36,7 +36,7 @@ describe("User class", () => {
         id: "id-1111",
         username: "john_doe",
         password: "abc@ABC@123",
-        accessLevel: "COMMON",
+        role: "COMMON",
       };
       expect(new User(userData)).toBeInstanceOf(User);
     });
@@ -46,7 +46,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "",
           password: "abc@ABC@123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(RequiredFieldError);
       });
@@ -54,7 +54,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john doe",
           password: "abc@ABC@123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -62,7 +62,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john doe",
           password: "@abc-ABC-123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -70,7 +70,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "2025john doe",
           password: "@abc-ABC-123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -81,7 +81,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "johndoe",
           password: "",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(RequiredFieldError);
       });
@@ -89,7 +89,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "a@ABC@1",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -97,7 +97,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "ABCD@1234",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -105,7 +105,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "abcd@1234",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -113,7 +113,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "abcd1234",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -131,7 +131,7 @@ describe("User class", () => {
       const userData: UserType = {
         username: "john_doe",
         password: "abc@ABC@123",
-        accessLevel: "COMMON",
+        role: "COMMON",
       };
 
       const user = new User(userData);
@@ -152,7 +152,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "abc@ABC@123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
 
         const user = new User(userData);
@@ -170,7 +170,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "abc@ABC@123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
 
         const user = new User(userData);
@@ -189,7 +189,7 @@ describe("User class", () => {
         const userData: UserType = {
           username: "john_doe",
           password: "abc@ABC@123",
-          accessLevel: "COMMON",
+          role: "COMMON",
         };
 
         const user = new User(userData);

@@ -21,8 +21,9 @@ export default class File extends Node {
     renameTo: (file: File, filename: string) => Promise<void>,
   ): Promise<void> {
     if (newFilename) {
+      const [, ext] = this.getName().split(".");
       await renameTo(this, newFilename);
-      this.setName(newFilename);
+      this.setName(`${newFilename}.${ext}`);
     }
   }
 
@@ -32,8 +33,8 @@ export default class File extends Node {
   ): Promise<void> {
     if (!this.equals(dir)) {
       await moveTo(this, dir);
-      this.getParents()!.removeChild(this);
-      this.setParents(dir);
+      this.getParent()!.removeChild(this);
+      this.setParent(dir);
       dir.addChild(this);
     }
   }
@@ -41,12 +42,13 @@ export default class File extends Node {
   async copy(
     dir: Directory,
     copyTo: (file: File, destiny: Directory) => Promise<string>,
-  ): Promise<void> {
+  ): Promise<File> {
     const [, extFile] = this.getName().split(".");
 
     const copyFileName = await copyTo(this, dir);
     const file = new File(copyFileName, extFile, dir);
     dir.addChild(file);
+    return file;
   }
 
   async moveToBin(
@@ -54,7 +56,7 @@ export default class File extends Node {
     toBin: (dir: File) => Promise<void>,
   ): Promise<void> {
     await toBin(this);
-    this.getParents()?.removeChild(this);
+    this.getParent()?.removeChild(this);
     bin.addChild(this);
   }
 }

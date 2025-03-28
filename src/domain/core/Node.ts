@@ -3,7 +3,7 @@ import InternalError from "../errors/InternalError";
 export default class Node {
   constructor(
     private name: string,
-    private parents: Node | null = null,
+    private parent: Node | null = null,
     private children: Node[] | null = [],
   ) {}
 
@@ -15,17 +15,17 @@ export default class Node {
     visitedNodes.add(node);
 
     if (this.name !== node.getName()) return false;
-    if (this.parents !== node.getParents()) return false;
+    if (this.parent !== node.getParent()) return false;
+
+    const thisChildren = this.children as Node[];
+    const nodeChildren = node.getChildren() as Node[];
+    if (thisChildren.length !== nodeChildren.length) return false;
+
     if (
       (this.children && !node.getChildren()) ||
       (!this.children && node.getChildren())
     )
       return false;
-
-    const thisChildren = this.children as Node[];
-    const nodeChildren = node.getChildren() as Node[];
-
-    if (thisChildren.length !== nodeChildren.length) return false;
 
     // Verifica se cada filho do primeiro nó existe no segundo e vice-versa
     return thisChildren.every((child) =>
@@ -37,16 +37,16 @@ export default class Node {
     return this.name;
   }
 
-  getParents(): Node | null {
-    return this.parents;
+  getParent(): Node | null {
+    return this.parent;
   }
 
   getChildren(): Node[] | null {
     return this.children;
   }
 
-  setParents(node: Node): void {
-    this.parents = node;
+  setParent(node: Node): void {
+    this.parent = node;
   }
 
   setName(name: string): void {
@@ -62,7 +62,7 @@ export default class Node {
 
   removeChild(node: Node): void {
     if (!this.children) {
-      return;
+      throw new InternalError();
     }
     this.children = this.children.filter((child) => !child.equals(node));
   }
