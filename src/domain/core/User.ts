@@ -1,4 +1,4 @@
-import { UserRoles, UserType } from "@/@types/types";
+import { UserRoles, UserStatus, UserType } from "@/@types/types";
 import RequiredFieldError from "../errors/RequiredFieldError";
 import InvalidFieldError from "../errors/InvalidFieldError";
 import Cryptography from "../interfaces/Cryptography";
@@ -48,12 +48,12 @@ export default class User {
 
   async passwordCompare(
     encrypter: Cryptography,
-    hash: string,
+    plainPassword: string,
   ): Promise<boolean> {
-    if (this.isHashed) {
+    if (!this.isHashed) {
       throw new InternalError();
     }
-    return await encrypter.compare(this.user.password, hash);
+    return await encrypter.compare(plainPassword, this.user.password);
   }
 
   getIsHashed(): boolean {
@@ -72,15 +72,19 @@ export default class User {
     return this.user.username;
   }
 
-  getAccessLevel(): UserRoles {
+  getUserRole(): UserRoles {
     return this.user.role;
   }
 
+  getStatus(): UserStatus {
+    return this.user.status;
+  }
   setPassword(newPassword: string): void {
     if (!this.isPasswordValid(newPassword)) {
       throw new InvalidFieldError("password");
     }
     this.user.password = newPassword;
+    this.isHashed = false;
   }
 
   setId(id: string): void {
@@ -88,5 +92,13 @@ export default class User {
       throw new InvalidFieldError("Id");
     }
     this.user.id = id;
+  }
+
+  setIsHashed(isHashed: boolean = true): void {
+    this.isHashed = isHashed;
+  }
+
+  setStatus(status: UserStatus): void {
+    this.user.status = status;
   }
 }

@@ -7,6 +7,7 @@
 */
 
 import { UserType } from "@/@types/types";
+import { encryptMock } from "@/__test__/__mocks__/interfacesMocks";
 import User from "@/domain/core/User";
 import InternalError from "@/domain/errors/InternalError";
 import InvalidFieldError from "@/domain/errors/InvalidFieldError";
@@ -28,6 +29,7 @@ describe("User class", () => {
         username: "john_doe",
         password: "abc@ABC@123",
         role: "COMMON",
+        status: "ACTIVE",
       };
       expect(new User(userData)).toBeInstanceOf(User);
     });
@@ -37,6 +39,7 @@ describe("User class", () => {
         username: "john_doe",
         password: "abc@ABC@123",
         role: "COMMON",
+        status: "ACTIVE",
       };
       expect(new User(userData)).toBeInstanceOf(User);
     });
@@ -47,6 +50,7 @@ describe("User class", () => {
           username: "",
           password: "abc@ABC@123",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(RequiredFieldError);
       });
@@ -55,6 +59,7 @@ describe("User class", () => {
           username: "john doe",
           password: "abc@ABC@123",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -63,6 +68,7 @@ describe("User class", () => {
           username: "john doe",
           password: "@abc-ABC-123",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -71,6 +77,7 @@ describe("User class", () => {
           username: "2025john doe",
           password: "@abc-ABC-123",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -82,6 +89,7 @@ describe("User class", () => {
           username: "johndoe",
           password: "",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(RequiredFieldError);
       });
@@ -90,6 +98,7 @@ describe("User class", () => {
           username: "john_doe",
           password: "a@ABC@1",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -98,6 +107,7 @@ describe("User class", () => {
           username: "john_doe",
           password: "ABCD@1234",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -106,6 +116,7 @@ describe("User class", () => {
           username: "john_doe",
           password: "abcd@1234",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -114,6 +125,7 @@ describe("User class", () => {
           username: "john_doe",
           password: "abcd1234",
           role: "COMMON",
+          status: "ACTIVE",
         };
         expect(() => new User(userData)).toThrow(InvalidFieldError);
       });
@@ -132,6 +144,7 @@ describe("User class", () => {
         username: "john_doe",
         password: "abc@ABC@123",
         role: "COMMON",
+        status: "ACTIVE",
       };
 
       const user = new User(userData);
@@ -148,17 +161,22 @@ describe("User class", () => {
           compare: jest.fn(),
         };
         hasherMock.compare.mockResolvedValue(true);
+        hasherMock.encrypt.mockResolvedValue("hashMockabc@ABC@123");
 
         const userData: UserType = {
           username: "john_doe",
-          password: "abc@ABC@123",
+          password: "hashMockabc@ABC@123",
           role: "COMMON",
+          status: "ACTIVE",
         };
 
         const user = new User(userData);
+        await user.encryptPassword(encryptMock);
 
-        const hash = "hashMockabc@ABC@123";
-        expect(user.passwordCompare(hasherMock, hash)).resolves.toBe(true);
+        const plainPassword = "abc@ABC@123";
+        expect(user.passwordCompare(hasherMock, plainPassword)).resolves.toBe(
+          true,
+        );
       });
       it("Deve retornar false se o não hash for gerado a partir da senha.", async () => {
         const hasherMock: jest.Mocked<Cryptography> = {
@@ -166,40 +184,43 @@ describe("User class", () => {
           compare: jest.fn(),
         };
         hasherMock.compare.mockResolvedValue(false);
+        hasherMock.encrypt.mockResolvedValue("hashMockabc@ABC@123");
 
         const userData: UserType = {
           username: "john_doe",
-          password: "abc@ABC@123",
+          password: "hashMockabc@ABC@123",
           role: "COMMON",
+          status: "ACTIVE",
         };
 
         const user = new User(userData);
+        await user.encryptPassword(encryptMock);
 
-        const hash = "hashMockabc@ABC@123";
-        expect(user.passwordCompare(hasherMock, hash)).resolves.toBe(false);
+        const planPassword = "abc@ABC@123";
+        expect(user.passwordCompare(hasherMock, planPassword)).resolves.toBe(
+          false,
+        );
       });
-      it("Deve retornar erro se a senha da classe user já for um hash", async () => {
+      it("Deve retornar erro se a senha da classe user não for um hash", async () => {
         const hasherMock: jest.Mocked<Cryptography> = {
           encrypt: jest.fn(),
           compare: jest.fn(),
         };
-        hasherMock.encrypt.mockResolvedValue("passwordHashed");
         hasherMock.compare.mockResolvedValue(false);
 
         const userData: UserType = {
           username: "john_doe",
-          password: "abc@ABC@123",
+          password: "hashMockabc@ABC@123",
           role: "COMMON",
+          status: "ACTIVE",
         };
 
         const user = new User(userData);
 
-        await user.encryptPassword(hasherMock);
-
-        const hash = "hashMockabc@ABC@123";
-        expect(user.passwordCompare(hasherMock, hash)).rejects.toThrow(
-          InternalError,
-        );
+        const plainPassword = "abc@ABC@123";
+        expect(
+          async () => await user.passwordCompare(hasherMock, plainPassword),
+        ).rejects.toThrow(InternalError);
       });
     });
   });

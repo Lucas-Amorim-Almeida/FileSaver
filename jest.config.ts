@@ -14,7 +14,7 @@ const config: Config = {
   moduleNameMapper: {
     "@/(.*)": "<rootDir>/src/$1",
   },
-  modulePathIgnorePatterns: ["__mocks__", "@types"],
+  modulePathIgnorePatterns: ["__mocks__", "@types", "interfaces", "errors"],
   // An array of file extensions your modules use
   // moduleFileExtensions: [
   //   "js",
