@@ -5,6 +5,11 @@ import RequiredFieldError from "@/domain/errors/RequiredFieldError";
 import * as config from "../../../../config/config.json";
 import InvalidFieldError from "@/domain/errors/InvalidFieldError";
 import InternalError from "@/domain/errors/InternalError";
+import User from "@/domain/core/User";
+import { userCOMMON_Id } from "@/__test__/__mocks__/userMocks";
+import Root from "@/domain/core/Root";
+
+const user = new User(userCOMMON_Id);
 
 describe("Directory", () => {
   describe("Constructor", () => {
@@ -58,14 +63,16 @@ describe("Directory", () => {
       expect(dir.isBinDir()).toBe(false);
     });
     it("Deve retornar false, nome do diretório coincide com o da lixeira e não está na raiz.", () => {
-      const rootDir = new Directory(config.ROOT_DIR);
+      const rootDir = new Root(user);
+
       const parentDir = new Directory("parent_dir", rootDir);
       const dir = new Directory(config.BIN_DIR, parentDir);
       expect(dir.isBinDir()).toBe(false);
     });
 
     it("Deve retornar true.", () => {
-      const rootDir = new Directory(config.ROOT_DIR);
+      const rootDir = new Root(user);
+
       const dir = new Directory(config.BIN_DIR, rootDir);
       expect(dir.isBinDir()).toBe(true);
     });
@@ -79,11 +86,24 @@ describe("Directory", () => {
 
     it("Deve retornar false, nome do diretório coincide com o da raiz e o diretorio tem um pai.", () => {
       const parentDir = new Directory("parent_dir");
-      const dir = new Directory(config.ROOT_DIR, parentDir);
+      const dir = new Directory(
+        `${config.ROOT_DIR}${user.getUsername()}`,
+        parentDir,
+      );
       expect(dir.isRootDir()).toBe(false);
     });
+
     it("Deve retornar true", () => {
-      const dir = new Directory(config.ROOT_DIR);
+      const appRoot = new Directory(`${config.APPLICATION_ROOT}`);
+      const dir = new Directory(
+        `${config.ROOT_DIR}${user.getUsername()}`,
+        appRoot,
+      );
+      expect(dir.isRootDir()).toBe(true);
+    });
+
+    it("Deve retornar true", () => {
+      const dir = new Root(user);
       expect(dir.isRootDir()).toBe(true);
     });
   });
@@ -107,7 +127,7 @@ describe("Directory", () => {
         async () => await dir.rename(config.BIN_DIR, renameTo),
       ).rejects.toThrow(InvalidFieldError);
       expect(
-        async () => await dir.rename(config.ROOT_DIR, renameTo),
+        async () => await dir.rename(`${config.ROOT_DIR}test`, renameTo),
       ).rejects.toThrow(InvalidFieldError);
     });
 
@@ -122,8 +142,9 @@ describe("Directory", () => {
   });
 
   describe("move", () => {
-    const rootDir = new Directory(config.ROOT_DIR);
+    const rootDir = new Root(user);
     let dir: Directory;
+
     beforeEach(() => {
       dir = new Directory("directory name", rootDir);
       rootDir.addChild(dir);
@@ -134,7 +155,6 @@ describe("Directory", () => {
 
     it("Deve lançar uma exceção InternalError quando o diretório atual for a lixeira ou a raiz.", async () => {
       const moveTo = jest.fn();
-      const rootDir = new Directory(config.ROOT_DIR);
       const binDir = new Directory(config.BIN_DIR, rootDir);
 
       expect(async () => await rootDir.move(dir, moveTo)).rejects.toThrow(
@@ -170,7 +190,7 @@ describe("Directory", () => {
 
   describe("copy", () => {
     let dir: Directory;
-    const rootDir = new Directory(config.ROOT_DIR);
+    const rootDir = new Root(user);
     beforeEach(() => {
       dir = new Directory("directory name", rootDir);
       rootDir.addChild(dir);
@@ -181,7 +201,6 @@ describe("Directory", () => {
 
     it("Deve lançar uma exceção InternalError quando o diretório atual for a lixeira ou a raiz.", async () => {
       const copyTo = jest.fn();
-      const rootDir = new Directory(config.ROOT_DIR);
       const binDir = new Directory(config.BIN_DIR, rootDir);
 
       expect(async () => await rootDir.copy(dir, copyTo)).rejects.toThrow(

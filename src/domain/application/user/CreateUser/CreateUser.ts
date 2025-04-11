@@ -6,6 +6,7 @@ import EntityAlreadyExistsError from "@/domain/errors/EntityAlreadyExistsError";
 import User from "@/domain/core/User";
 import Cryptography from "@/domain/interfaces/Cryptography";
 import InternalError from "@/domain/errors/InternalError";
+import UserDirectoryFactory from "../../interfaces/UserDirectoryFactory";
 
 export default class CreateUser
   implements UseCase<UserType, Partial<UserType>>
@@ -13,6 +14,7 @@ export default class CreateUser
   constructor(
     readonly repository: Repository,
     private readonly encrypter: Cryptography,
+    private readonly directoryFactory: UserDirectoryFactory,
   ) {}
 
   async execute(
@@ -20,10 +22,10 @@ export default class CreateUser
   ): Promise<Partial<UserType>[]> {
     const userInputData = inputData.get();
 
-    const userData: UserType | null = await this.repository.getOne({
+    const existingUser: UserType | null = await this.repository.getOne({
       username: userInputData.username,
     });
-    if (userData) {
+    if (existingUser) {
       throw new EntityAlreadyExistsError("User");
     }
 
@@ -35,6 +37,8 @@ export default class CreateUser
     if (!dbUser) {
       throw new InternalError();
     }
+
+    await this.directoryFactory.createFor(dbUser);
 
     return [
       {

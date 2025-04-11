@@ -45,6 +45,19 @@ export default class Node {
     return this.children;
   }
 
+  getPath(): string {
+    let current = this as Node;
+    const dirNames: string[] = [];
+    dirNames.push(this.getName());
+
+    while (current.getParent()) {
+      current = current.getParent() as Node;
+      dirNames.push(current.getName());
+    }
+
+    return dirNames.reverse().join("/");
+  }
+
   setParent(node: Node): void {
     this.parent = node;
   }

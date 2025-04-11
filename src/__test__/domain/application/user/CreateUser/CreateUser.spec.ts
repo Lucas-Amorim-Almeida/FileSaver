@@ -5,10 +5,15 @@
     deve validar nome de usuário e senha;   
     deve hashear a senha
     deve passar os dados de User para o repositório para persistir os dados no banco
+  deve criar o diretório root para o usuáro: @username
 */
 
 import { UserType } from "@/@types/types";
-import { encryptMock, repoMock } from "@/__test__/__mocks__/interfacesMocks";
+import {
+  encryptMock,
+  repoMock,
+  userDirFactory,
+} from "@/__test__/__mocks__/interfacesMocks";
 import {
   userCOMMON,
   userCOMMON_Id,
@@ -23,7 +28,9 @@ import InternalError from "@/domain/errors/InternalError";
 describe("CreateUser", () => {
   describe("Constructot", () => {
     it("Deve instanciar um objeto da classe CreateUser.", () => {
-      expect(new CreateUser(repoMock, encryptMock)).toBeInstanceOf(CreateUser);
+      expect(
+        new CreateUser(repoMock, encryptMock, userDirFactory),
+      ).toBeInstanceOf(CreateUser);
     });
   });
 
@@ -42,7 +49,7 @@ describe("CreateUser", () => {
       //retorna user com id se o usuário for salvo na base com sucesso.
       repoMock.save.mockResolvedValue(new User(userCOMMON_Id));
 
-      const user = new CreateUser(repoMock, encryptMock);
+      const user = new CreateUser(repoMock, encryptMock, userDirFactory);
 
       const [methodResponse] = await user.execute(inputMock);
 
@@ -66,7 +73,7 @@ describe("CreateUser", () => {
       //retorna null se o usuário não for salvo na base.
       repoMock.save.mockResolvedValue(null);
 
-      const user = new CreateUser(repoMock, encryptMock);
+      const user = new CreateUser(repoMock, encryptMock, userDirFactory);
 
       expect(async () => await user.execute(inputMock)).rejects.toThrow(
         InternalError,
@@ -86,7 +93,7 @@ describe("CreateUser", () => {
       //retorna um usuário que existe na base de dados.
       repoMock.getOne.mockResolvedValue(userCOMMON_Id);
 
-      const user = new CreateUser(repoMock, encryptMock);
+      const user = new CreateUser(repoMock, encryptMock, userDirFactory);
 
       expect(async () => await user.execute(inputMock)).rejects.toThrow(
         EntityAlreadyExistsError,

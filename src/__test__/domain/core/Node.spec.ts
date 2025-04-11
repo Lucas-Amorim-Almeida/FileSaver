@@ -145,4 +145,21 @@ describe("Node", () => {
       );
     });
   });
+
+  describe("getPath", () => {
+    it("Deve retornar uma string correspondente ao caminho desde a raiz até o node atual", () => {
+      const root = new Node("Root");
+      const child1 = new Node("Child1", root);
+      const child2 = new Node("Child2", child1);
+      const child3 = new Node("Child3", child2);
+
+      expect(child3.getPath()).toBe("Root/Child1/Child2/Child3");
+    });
+
+    it("Deve retornar uma string quando o node não possio parents.", () => {
+      const node = new Node("node");
+
+      expect(node.getPath()).toBe(node.getName());
+    });
+  });
 });

@@ -6,6 +6,8 @@ import Node from "./Node";
 import Bin from "./Bin";
 
 export default class Directory extends Node {
+  protected readonly APP_ROOT = new Node(config.APPLICATION_ROOT, null);
+
   constructor(
     dirName: string,
     parents: Node | null = null,
@@ -17,36 +19,33 @@ export default class Directory extends Node {
     super(dirName, parents, children);
   }
 
-  isBinDir(): boolean {
-    if (this.getName() !== config.BIN_DIR) {
+  isRootDir(): boolean {
+    const initRootName = config.ROOT_DIR;
+    if (!this.getName().includes(initRootName)) {
       return false;
     }
 
-    //se o pai for null (falsy) é raiz e não lixeira
-    if (!this.getParent()) {
-      return false;
-    }
-
-    const root = new Directory(config.ROOT_DIR);
-    if (!root.equals(this.getParent() as Node)) {
+    //se existe diretório pai não é raiz
+    const parent = this.getParent();
+    if (!parent?.equals(this.APP_ROOT)) {
       return false;
     }
 
     return true;
   }
 
-  isRootDir(): boolean {
-    if (this.getName() !== config.ROOT_DIR) {
+  isBinDir(): boolean {
+    if (this.getName() !== config.BIN_DIR) {
       return false;
     }
 
-    //se existe diretório pai não é raiz
-    if (this.getParent()) {
+    //se o pai for null (falsy) é raiz e não lixeira
+    const parent = this.getParent() as Directory | null;
+    if (!parent?.isRootDir()) {
       return false;
     }
 
-    const root = new Directory(config.ROOT_DIR);
-    return root.equals(this);
+    return true;
   }
 
   async rename(
@@ -56,7 +55,7 @@ export default class Directory extends Node {
     if (!newDirName) {
       return;
     }
-    if (newDirName === config.BIN_DIR || newDirName === config.ROOT_DIR) {
+    if (newDirName.includes("@")) {
       throw new InvalidFieldError("Directory name");
     }
 

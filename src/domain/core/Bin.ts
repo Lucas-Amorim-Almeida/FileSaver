@@ -5,10 +5,7 @@ import Directory from "./Directory";
 import Node from "./Node";
 
 export default class Bin extends Node {
-  constructor(
-    root: Directory = new Directory(config.ROOT_DIR),
-    children: Node[] = [],
-  ) {
+  constructor(root: Directory | null = null, children: Node[] = []) {
     super(config.BIN_DIR, root, children);
   }
 
